@@ -1,0 +1,28 @@
+package com.devsuperior.uri2737.repositories;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import com.devsuperior.uri2737.entities.Lawyer;
+import com.devsuperior.uri2737.projections.LawyerMinProjection;
+
+public interface LawyerRepository extends JpaRepository<Lawyer, Long> {
+	
+	@Query(nativeQuery = true, value = "((SELECT lawyers.name, lawyers.customers_number AS customersNumber "
+			+ "FROM lawyers "
+			+ "WHERE lawyers.customers_number = ("
+			+ "SELECT MAX(lawyers.customers_number) "
+			+ "FROM lawyers)) "
+			+ "UNION ALL ("
+			+ "SELECT lawyers.name, lawyers.customers_number "
+			+ "FROM lawyers "
+			+ "WHERE lawyers.customers_number = ("
+			+ "SELECT MIN(lawyers.customers_number) "
+			+ "FROM lawyers)) "
+			+ "UNION ALL ("
+			+ "SELECT 'Average', ROUND(AVG(lawyers.customers_number),0) FROM lawyers))")
+	List<LawyerMinProjection> search1();
+
+}
